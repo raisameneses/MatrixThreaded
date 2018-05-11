@@ -1,13 +1,13 @@
 /*
  *  Matrix Task Processor
  *  Based on Operating Systems: Three Easy Pieces by R. Arpaci-Dusseau and A. Arpaci-Dusseau
- * 
+ *
  *  Assignment 3 code
  *  Program operates on tasks submitted to the tasks_input directory
  *  Results are created in the tasks_output directory
  *
  *  A bounded buffer is used to store pending tasks
- *  A producer thread reads tasks from the tasks_input directory 
+ *  A producer thread reads tasks from the tasks_input directory
  *  Consumer threads perform tasks in parallel
  *  Program is designed to run as a daemon (i.e. forever) until receiving a request to exit.
  *
@@ -29,8 +29,11 @@
 
 int main (int argc, char * argv[])
 {
+
+  pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER; //Lock
+  pthread_cond_t cond = PTHREAD_COND_INITIALIZER; //Condition initializer
   // Uncomment to see example operation of the readtasks() routine
-  readtasks((void *)100);  
+  readtasks((void *)100);
 
   // Uncomment to see example operation of the dotasks() routine
   //dotasks((void *) NULL);
