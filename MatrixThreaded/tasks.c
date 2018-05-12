@@ -1,13 +1,13 @@
 /*
  *  Matrix Task Processor - tasks module
  *  Based on Operating Systems: Three Easy Pieces by R. Arpaci-Dusseau and A. Arpaci-Dusseau
- * 
+ *
  *  Assignment 3 code
  *  Program operates on tasks submitted to the tasks_input directory
  *  Results are created in the tasks_output directory
  *
  *  A bounded buffer is used to store pending tasks
- *  A producer thread reads tasks from the tasks_input directory 
+ *  A producer thread reads tasks from the tasks_input directory
  *  Consumer threads perform tasks in parallel
  *  Program is designed to run as a daemon (i.e. forever) until receiving a request to exit.
  *
@@ -40,7 +40,7 @@
 // and also the size of the in_dir and out_dir name length
 #define BUFFSIZ 80
 
-// MAX should defined the size of the bounded buffer 
+// MAX should defined the size of the bounded buffer
 #define MAX 200
 #define OUTPUT 1
 
@@ -74,8 +74,8 @@ typedef struct __task_t {
 } task_t;
 
 // TO DO
-// Implement sleep in ms 
-void sleepms(int milliseconds) 
+// Implement sleep in ms
+void sleepms(int milliseconds)
 {
 }
 
@@ -83,7 +83,7 @@ void sleepms(int milliseconds)
 
 // Implement Bounded Buffer get() here
 
-// This routine continually reads the contents of the "in_dir" to look for 
+// This routine continually reads the contents of the "in_dir" to look for
 // command files to process.  Commands are parsed and should be added to the
 // bounded buffer...
 void *readtasks(void *arg)
@@ -106,13 +106,13 @@ void *readtasks(void *arg)
     printf("Processing tasks in dir='%s'\n",in_dir);
 
     /* Scanning the in directory */
-    if (NULL == (FD = opendir (in_dir))) 
+    if (NULL == (FD = opendir (in_dir)))
     {
         fprintf(stderr, "Error : Failed to open input directory - %s\n", strerror(errno));
         return 1;
     }
 
-    // continuously process the command files in the "in_dir" directory 
+    // continuously process the command files in the "in_dir" directory
     while (1)
     {
         if (FD != NULL)
@@ -125,11 +125,11 @@ void *readtasks(void *arg)
            if (FD != NULL)
            {
              closedir(FD);
-             //implement sleep command in ms here  
+             //implement sleep command in ms here
              //sleepms(sleep_ms);
              FD = NULL;
            }
-           if (NULL == (FD = opendir (in_dir))) 
+           if (NULL == (FD = opendir (in_dir)))
            {
              fprintf(stderr, "Error : Failed to open input directory - %s\n", strerror(errno));
              return 1;
@@ -142,7 +142,7 @@ void *readtasks(void *arg)
            */
           if (!strcmp (in_file->d_name, "."))    // ignore the present working dir
               continue;
-          if (!strcmp (in_file->d_name, ".."))   // ignore the previous dir 
+          if (!strcmp (in_file->d_name, ".."))   // ignore the previous dir
               continue;
 
           // build an absolute path to the files in the "in_dir" for processing
@@ -175,7 +175,7 @@ void *readtasks(void *arg)
               //
               // THE NEW COMMAND WILL BE IN "buffer"
               printf("Read the command='%s'\n",buffer);
-              
+
               // First make a copy of the string in the buffer
 
               // Add this copy to the bounded buffer for processing by consumer threads...
@@ -217,8 +217,8 @@ task_t *processTask(char * task)
   t->row = strtokgetint();
   t->col = strtokgetint();
   t->ele = strtokgetint();
- 
-#if OUTPUT 
+
+#if OUTPUT
   printf("cmd=%c row=%d col=%d ele=%d\n",t->cmd,t->row,t->col,t->ele);
 #endif
   return t;
@@ -226,7 +226,7 @@ task_t *processTask(char * task)
 
 /*
  *  This routine is run by the consumer threads.
- *  It grabs a task from the bounded buffer of commands, 
+ *  It grabs a task from the bounded buffer of commands,
  *  determines what the command is, and executes it...
  */
 void *dotasks(void * arg)
@@ -249,34 +249,34 @@ void *dotasks(void * arg)
     // create matrix command example
     sprintf(task, "c a1 20 20 100");
 
-    // display matrix command example
-    //sprintf(task, "d a2 10 10 100");
-    // sum matrix command example
-    //sprintf(task, "s a3 5 5 1");
-    // avg matrix command example
-    //sprintf(task, "a a4 5 5 1");
-    // remove matrix command example
-    //sprintf(task, "r a1 20 20 100");
-    // exit command example
-    //sprintf(task, "x");
+    display matrix command example
+    sprintf(task, "d a2 10 10 100");
+    sum matrix command example
+    sprintf(task, "s a3 5 5 1");
+    avg matrix command example
+    sprintf(task, "a a4 5 5 1");
+    remove matrix command example
+    sprintf(task, "r a1 20 20 100");
+    exit command example
+    sprintf(task, "x");
 
     // TO DO
     // Remove this sleep command - it is here for demonstration purposes only
-    // For now this puts a 1 sec interval between repeating the same command over and over again 
+    // For now this puts a 1 sec interval between repeating the same command over and over again
     sleep(1);
 
     printf("***************DO TASK: '%s'\n",task);
 
     task_t * newtask = processTask(task);
     switch (newtask->cmd)
-    { 
+    {
       case 'c':
       {
         char cwd[1024];
         if (!(getcwd(cwd, sizeof(cwd)) != NULL))
           fprintf(stderr, "getcwd error\n");
         matrix = AllocMatrix(newtask->row,newtask->col);
-        GenMatrixType(matrix,newtask->row, newtask->col, newtask->ele); 
+        GenMatrixType(matrix,newtask->row, newtask->col, newtask->ele);
         char tmpfilename[FULLFILENAME];
         sprintf(tmpfilename,"%s/%s/%s.mat",cwd,out_dir,newtask->name);
         matrix_file = fopen(tmpfilename, "w");
@@ -301,7 +301,7 @@ void *dotasks(void * arg)
         char tmpfilename[FULLFILENAME];
         sprintf(tmpfilename,"%s/%s/%s.sum",cwd,out_dir,newtask->name);
         matrix_file = fopen(tmpfilename, "w");
-        fprintf(matrix_file,"sum=%d\n",SumMatrix(matrix,newtask->row,newtask->col)); 
+        fprintf(matrix_file,"sum=%d\n",SumMatrix(matrix,newtask->row,newtask->col));
         fclose(matrix_file);
         FreeMatrix(matrix,newtask->row,newtask->col);
         break;
@@ -333,6 +333,3 @@ void *dotasks(void * arg)
     }
   }
 }
-
-
-
