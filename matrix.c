@@ -1,7 +1,7 @@
 /*
  *  Matrix task processor - matrix module
  *  Based on Operating Systems: Three Easy Pieces by R. Arpaci-Dusseau and A. Arpaci-Dusseau
- * 
+ *
  *  Wes J. Lloyd
  *  University of Washington, Tacoma
  *  TCSS 422 - Operating Systems
@@ -77,7 +77,21 @@ void GenMatrix(int ** matrix, const int height, const int width)
 // Implement the AvgElement function
 int AvgElement(int ** matrix, const int height, const int width)
 {
-  return 1;
+  int sum=0;
+  int y=0;
+  int i, j;
+  int amount;
+  for (i=0; i<height; i++)
+  {
+    int *mm = matrix[i];
+    for (j=0; j<width; j++)
+    {
+      y=mm[j];
+      sum=sum+y;
+      amount++;
+    }
+  }
+  return sum/amount;
 }
 
 int SumMatrix(int ** matrix, const int height, const int width)
@@ -90,7 +104,7 @@ int SumMatrix(int ** matrix, const int height, const int width)
     int *mm = matrix[i];
     for (j=0; j<width; j++)
     {
-      y=mm[j];  
+      y=mm[j];
       sum=sum+y;
     }
   }
@@ -102,13 +116,13 @@ void DisplayMatrix(int ** matrix, const int height, const int width, FILE *strea
   int y=0;
   int i, j;
   for (i=0; i<height; i++)
-  { 
+  {
     int *mm = matrix[i];
     fprintf(stream, "|");
     for (j=0; j<width; j++)
     {
       y=mm[j];
-      if (j==0)  
+      if (j==0)
         fprintf(stream, "%3d",y);
       else
         fprintf(stream, " %3d",y);
@@ -116,4 +130,3 @@ void DisplayMatrix(int ** matrix, const int height, const int width, FILE *strea
     fprintf(stream, "|\n");
   }
 }
-
