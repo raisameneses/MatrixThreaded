@@ -49,10 +49,10 @@ int main (int argc, char * argv[])
   pthread_create(&producer, NULL, readtasks, sleep_ms);
 
   // Create one or more pthreads for dotasks()
-  pthread_create(&c1, NULL, dotasks, sleep_ms);
-  pthread_create(&c2, NULL, dotasks, sleep_ms);
-  pthread_create(&c3, NULL, dotasks, sleep_ms);
-  pthread_create(&c4, NULL, dotasks, sleep_ms);
+  pthread_create(&c1, NULL, dotasks, NULL);
+  pthread_create(&c2, NULL, dotasks, NULL);
+  pthread_create(&c3, NULL, dotasks, NULL);
+  pthread_create(&c4, NULL, dotasks, NULL);
 
   pthread_join(p, NULL);
   pthread_join(p, NULL);
