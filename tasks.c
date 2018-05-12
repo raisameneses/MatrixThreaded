@@ -268,15 +268,15 @@ void *dotasks(void * arg)
     sprintf(task, "c a1 20 20 100");
 
     // display matrix command example
-    //sprintf(task, "d a2 10 10 100");
+    sprintf(task, "d a2 10 10 100");
     // sum matrix command example
-    //sprintf(task, "s a3 5 5 1");
+    sprintf(task, "s a3 5 5 1");
     // avg matrix command example
-    //sprintf(task, "a a4 5 5 1");
+    sprintf(task, "a a4 5 5 1");
     // remove matrix command example
-    //sprintf(task, "r a1 20 20 100");
+    sprintf(task, "r a1 20 20 100");
     // exit command example
-    //sprintf(task, "x");
+    sprintf(task, "x");
 
     // TO DO
     // Remove this sleep command - it is here for demonstration purposes only
