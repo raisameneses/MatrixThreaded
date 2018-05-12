@@ -43,15 +43,16 @@
 // MAX should defined the size of the bounded buffer
 #define MAX 200
 #define OUTPUT 1
+#define MILLI_TO_MICROSECONDS = 1000;
 
 // buffer
-char ** buffer [MAX];
+char ** boundedBuffer [MAX];
 char * tasks[MAX];
+
+// Define variables for get/put routines
 int fill_ptr = 0;
 int use_ptr = 0;
 int count = 0;
-// Define variables for get/put routines
-
 // task data structure
 // used to capture command information
 // c - create matrix (saves output as .mat file)
@@ -76,38 +77,35 @@ typedef struct __task_t {
   int ele;
 } task_t;
 
-// TO DO
+
 // Implement sleep in ms
 void sleepms(int milliseconds)
 {
+   usleep(milliseconds * MILLI_TO_MICROSECONDS);
 }
 
 // Implement Bounded Buffer put() here
 
 void put(char* command) {
-  buffer[fill_ptr] = command;
+  boundedBuffer[fill_ptr] = command;
   fill_ptr = (fill_ptr + 1) % MAX;
   count++;
 }
 
+// Implement Bounded Buffer get() here
 char* get(){
-   char* temp = buffer[use_ptr];
+   char* temp = boundedBuffer[use_ptr];
    use_ptr = (use_ptr + 1) % MAX;
    count--;
    return temp;
 }
-
-// Implement Bounded Buffer get() here
 
 // This routine continually reads the contents of the "in_dir" to look for
 // command files to process.  Commands are parsed and should be added to the
 // bounded buffer...
 void *readtasks(void *arg)
 {
-    // TO DO
     // The sleep duration in ms should be passed in using pthread_create
-    // lecture slides from class provide example code
-    //
     int sleep_ms = (int) arg;
     char in_dir[BUFFSIZ] = "tasks_input";
     DIR* FD = NULL;
@@ -142,7 +140,7 @@ void *readtasks(void *arg)
            {
              closedir(FD);
              //implement sleep command in ms here
-             //sleepms(sleep_ms);
+             sleepms(sleep_ms);
              FD = NULL;
            }
            if (NULL == (FD = opendir (in_dir)))
