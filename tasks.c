@@ -191,9 +191,13 @@ void *readtasks(void *arg)
               printf("Read the command='%s'\n",buffer);
 
               // First make a copy of the string in the buffer
+              //RAISA COMMENT: DO WE NEED TO ASSIGN THE BUFFER?
+
 
               // Add this copy to the bounded buffer for processing by consumer threads...
+
               // Use of locks and condition variables and call to put() routine...
+              //RAISA COMMENT: SEE PAGE 352
           }
 
           /* When you finish with the file, close it */
