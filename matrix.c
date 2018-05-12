@@ -77,7 +77,21 @@ void GenMatrix(int ** matrix, const int height, const int width)
 // Implement the AvgElement function
 int AvgElement(int ** matrix, const int height, const int width)
 {
-  return 1;
+  int sum=0;
+  int y=0;
+  int i, j;
+  int amount;
+  for (i=0; i<height; i++)
+  {
+    int *mm = matrix[i];
+    for (j=0; j<width; j++)
+    {
+      y=mm[j];
+      sum=sum+y;
+      amount++;
+    }
+  }
+  return sum/amount;
 }
 
 int SumMatrix(int ** matrix, const int height, const int width)
