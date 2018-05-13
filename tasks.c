@@ -30,7 +30,7 @@
 #include <sys/time.h>
 #include "matrix.h"
 
-// Maximum command filename length
+// Maximum command filename length t
 #define MAXFILENAMELEN 256
 
 // Maximum absolute filename length
@@ -43,12 +43,18 @@
 // MAX should defined the size of the bounded buffer
 #define MAX 200
 #define OUTPUT 1
+#define MILLI_TO_MICROSECONDS = 1000;
 
-// Define bounded buffer here - use static size of MAX
+// buffer
+char ** boundedBuffer [MAX];
 char * tasks[MAX];
 
 // Define variables for get/put routines
-
+int fill_ptr = 0;
+int use_ptr = 0;
+int count = 0;
+pthread_cond_t empty, fill;
+pthread_mutex_t mutex;
 // task data structure
 // used to capture command information
 // c - create matrix (saves output as .mat file)
@@ -73,25 +79,35 @@ typedef struct __task_t {
   int ele;
 } task_t;
 
-// TO DO
-// Implement sleep in ms
+
+// Implement sleep in ms when user runs programs make ./pcmatrix
 void sleepms(int milliseconds)
 {
+   usleep(milliseconds * MILLI_TO_MICROSECONDS);
 }
 
 // Implement Bounded Buffer put() here
 
+void put(char* command) {
+  boundedBuffer[fill_ptr] = command;
+  fill_ptr = (fill_ptr + 1) % MAX;
+  count++;
+}
+
 // Implement Bounded Buffer get() here
+char* get(){
+   char* temp = boundedBuffer[use_ptr];
+   use_ptr = (use_ptr + 1) % MAX;
+   count--;
+   return temp;
+}
 
 // This routine continually reads the contents of the "in_dir" to look for
 // command files to process.  Commands are parsed and should be added to the
 // bounded buffer...
 void *readtasks(void *arg)
 {
-    // TO DO
     // The sleep duration in ms should be passed in using pthread_create
-    // lecture slides from class provide example code
-    //
     int sleep_ms = (int) arg;
     char in_dir[BUFFSIZ] = "tasks_input";
     DIR* FD = NULL;
@@ -126,7 +142,7 @@ void *readtasks(void *arg)
            {
              closedir(FD);
              //implement sleep command in ms here
-             //sleepms(sleep_ms);
+             sleepms(sleep_ms);
              FD = NULL;
            }
            if (NULL == (FD = opendir (in_dir)))
@@ -177,9 +193,32 @@ void *readtasks(void *arg)
               printf("Read the command='%s'\n",buffer);
 
               // First make a copy of the string in the buffer
+              //RAISA COMMENT: DO WE NEED TO ASSIGN THE BUFFER?
+
 
               // Add this copy to the bounded buffer for processing by consumer threads...
+
               // Use of locks and condition variables and call to put() routine...
+              //RAISA COMMENT: SEE PAGE 352
+              //inititalize loops
+              int loops = (int) arg;
+              //for loop, lock each mutex variable and then put and then signal and wait
+              for(int i=0; i<loops; i++){
+                Pthread_mutex_lock(&mutex);
+                while(count==MAX) {
+                  Pthread_cond_wait(&empty, &mutex);
+                } put(i);
+                Pthread_cond_signal(&fill);
+                Pthread_mutex_unlock(&mutex);
+              }
+
+
+
+
+
+
+
+
           }
 
           /* When you finish with the file, close it */
@@ -249,15 +288,15 @@ void *dotasks(void * arg)
     // create matrix command example
     sprintf(task, "c a1 20 20 100");
 
-    display matrix command example
+    // display matrix command example
     sprintf(task, "d a2 10 10 100");
-    sum matrix command example
+    // sum matrix command example
     sprintf(task, "s a3 5 5 1");
-    avg matrix command example
+    // avg matrix command example
     sprintf(task, "a a4 5 5 1");
-    remove matrix command example
+    // remove matrix command example
     sprintf(task, "r a1 20 20 100");
-    exit command example
+    // exit command example
     sprintf(task, "x");
 
     // TO DO
@@ -308,9 +347,17 @@ void *dotasks(void * arg)
       }
       case 'a':
       {
-        // TO DO
-        //
-        // Implement Average Command
+        char cwd[1024];
+        f (!(getcwd(cwd, sizeof(cwd)) != NULL))
+          fprintf(stderr, "getcwd error\n");
+        matrix = AllocMatrix(newtask->row,newtask->col);
+        GenMatrixType(matrix,newtask->row, newtask->col, newtask->ele);
+        char tmpfilename[FULLFILENAME];
+        sprintf(tmpfilename,"%s/%s/%s.avg",cwd,out_dir,newtask->name);
+        matrix_file = fopen(tmpfilename, "w");
+        fprintf(matrix_file,"average=%d\n",AvgMatrix(matrix,newtask->row,newtask->col));
+        fclose(matrix_file);
+        FreeMatrix(matrix,newtask->row,newtask->col);
         break;
       }
       case 'r':
@@ -331,5 +378,17 @@ void *dotasks(void * arg)
         break;
       }
     }
+    int i;
+    int loops = (int) arg;
+    for(i=0; i<loops; i++) {
+      Pthread_mutex_lock(&mutex);
+      while(count==0){
+        Pthread_cond_wait(&fill);
+      } int temp = get();
+      Pthread_cond_signal(&empty);
+      Pthread_mutex_unlock(&mutex);
+      
+    }
+
   }
 }
