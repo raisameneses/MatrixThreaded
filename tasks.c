@@ -43,7 +43,7 @@
 // MAX should defined the size of the bounded buffer
 #define MAX 200
 #define OUTPUT 1
-#define MILLI_TO_MICROSECONDS = 1000;
+#define MILLI_TO_MICROSECONDS 1000
 
 // buffer
 char ** boundedBuffer [MAX];
@@ -53,8 +53,10 @@ char * tasks[MAX];
 int fill_ptr = 0;
 int use_ptr = 0;
 int count = 0;
-pthread_cond_t empty, fill;
-pthread_mutex_t mutex;
+pthread_cond_t empty = PTHREAD_COND_INITIALIZER;
+pthread_cond_t fill = PTHREAD_COND_INITIALIZER;
+pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+
 // task data structure
 // used to capture command information
 // c - create matrix (saves output as .mat file)
@@ -201,22 +203,17 @@ void *readtasks(void *arg)
               // Use of locks and condition variables and call to put() routine...
               //RAISA COMMENT: SEE PAGE 352
               //inititalize loops
-              int loops = (int) arg;
               //for loop, lock each mutex variable and then put and then signal and wait
-              for(int i=0; i<loops; i++){
-                Pthread_mutex_lock(&mutex);
-                while(count==MAX) {
-                  Pthread_cond_wait(&empty, &mutex);
-                } put(i);
-                Pthread_cond_signal(&fill);
-                Pthread_mutex_unlock(&mutex);
+
+              for(int i=0; i < MAX; i++){
+                pthread_mutex_lock(&mutex);
+                while(count == MAX) {
+                  pthread_cond_wait(&empty, &mutex);
+                }
+                put(buffer); //iS BUFFER HOLDING THE COMMAND AT THIS POINT??
+                pthread_cond_signal(&fill);
+                pthread_mutex_unlock(&mutex);
               }
-
-
-
-
-
-
 
 
           }
@@ -285,6 +282,19 @@ void *dotasks(void * arg)
     //
     // Read command to perform from the bounded buffer HERE
     char * task = (char *) &static_task;
+    int i;
+    //int loops = (int) arg;
+    for(i=0; i< MAX; i++) {
+      pthread_mutex_lock(&mutex);
+      while(count==0){
+        pthread_cond_wait(&fill, &mutex);
+      }
+      task = get();
+      pthread_cond_signal(&empty);
+      pthread_mutex_unlock(&mutex);
+
+    }
+
     // create matrix command example
     sprintf(task, "c a1 20 20 100");
 
@@ -348,14 +358,14 @@ void *dotasks(void * arg)
       case 'a':
       {
         char cwd[1024];
-        f (!(getcwd(cwd, sizeof(cwd)) != NULL))
+        if(!(getcwd(cwd, sizeof(cwd)) != NULL))
           fprintf(stderr, "getcwd error\n");
         matrix = AllocMatrix(newtask->row,newtask->col);
         GenMatrixType(matrix,newtask->row, newtask->col, newtask->ele);
         char tmpfilename[FULLFILENAME];
         sprintf(tmpfilename,"%s/%s/%s.avg",cwd,out_dir,newtask->name);
         matrix_file = fopen(tmpfilename, "w");
-        fprintf(matrix_file,"average=%d\n",AvgMatrix(matrix,newtask->row,newtask->col));
+        fprintf(matrix_file,"average=%d\n",AvgElement(matrix,newtask->row,newtask->col));
         fclose(matrix_file);
         FreeMatrix(matrix,newtask->row,newtask->col);
         break;
@@ -378,17 +388,7 @@ void *dotasks(void * arg)
         break;
       }
     }
-    int i;
-    int loops = (int) arg;
-    for(i=0; i<loops; i++) {
-      Pthread_mutex_lock(&mutex);
-      while(count==0){
-        Pthread_cond_wait(&fill);
-      } int temp = get();
-      Pthread_cond_signal(&empty);
-      Pthread_mutex_unlock(&mutex);
-      
-    }
+
 
   }
 }

@@ -54,10 +54,10 @@ int main (int argc, char * argv[])
   pthread_create(&c3, NULL, dotasks, NULL);
   pthread_create(&c4, NULL, dotasks, NULL);
 
-  pthread_join(p, NULL);
-  pthread_join(p, NULL);
-  pthread_join(p, NULL);
-  pthread_join(p, NULL);
-  pthread_join(p, NULL);
+  // pthread_join(p, NULL);
+  // pthread_join(p, NULL);
+  // pthread_join(p, NULL);
+  // pthread_join(p, NULL);
+  // pthread_join(p, NULL);
   return 0;
 }
