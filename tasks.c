@@ -46,7 +46,7 @@
 #define MILLI_TO_MICROSECONDS 1000
 
 // buffer
-char ** boundedBuffer [MAX];
+char * boundedBuffer[MAX];
 char * tasks[MAX];
 
 // Define variables for get/put routines
@@ -103,6 +103,8 @@ char* get(){
    count--;
    return temp;
 }
+
+
 
 // This routine continually reads the contents of the "in_dir" to look for
 // command files to process.  Commands are parsed and should be added to the
@@ -195,25 +197,20 @@ void *readtasks(void *arg)
               printf("Read the command='%s'\n",buffer);
 
               // First make a copy of the string in the buffer
-              //RAISA COMMENT: DO WE NEED TO ASSIGN THE BUFFER?
-
+              char command = malloc(sizeof (char)* MAXFILENAMELEN);
+              strcpy(command, buffer);
 
               // Add this copy to the bounded buffer for processing by consumer threads...
 
-              // Use of locks and condition variables and call to put() routine...
-              //RAISA COMMENT: SEE PAGE 352
-              //inititalize loops
-              //for loop, lock each mutex variable and then put and then signal and wait
-
-              for(int i=0; i < MAX; i++){
+              // Use of locks and condition vari
                 pthread_mutex_lock(&mutex);
                 while(count == MAX) {
                   pthread_cond_wait(&empty, &mutex);
                 }
-                put(buffer); //iS BUFFER HOLDING THE COMMAND AT THIS POINT??
+                put(command); //iS BUFFER HOLDING THE COMMAND AT THIS POINT??
                 pthread_cond_signal(&fill);
                 pthread_mutex_unlock(&mutex);
-              }
+
 
 
           }
@@ -284,7 +281,7 @@ void *dotasks(void * arg)
     char * task = (char *) &static_task;
     int i;
     //int loops = (int) arg;
-    for(i=0; i< MAX; i++) {
+
       pthread_mutex_lock(&mutex);
       while(count==0){
         pthread_cond_wait(&fill, &mutex);
@@ -293,11 +290,10 @@ void *dotasks(void * arg)
       pthread_cond_signal(&empty);
       pthread_mutex_unlock(&mutex);
 
-    }
+
 
     // create matrix command example
     sprintf(task, "c a1 20 20 100");
-
     // display matrix command example
     sprintf(task, "d a2 10 10 100");
     // sum matrix command example
@@ -312,7 +308,7 @@ void *dotasks(void * arg)
     // TO DO
     // Remove this sleep command - it is here for demonstration purposes only
     // For now this puts a 1 sec interval between repeating the same command over and over again
-    sleep(1);
+    // sleep(1);
 
     printf("***************DO TASK: '%s'\n",task);
 
