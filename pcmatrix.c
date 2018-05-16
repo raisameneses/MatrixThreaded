@@ -30,12 +30,9 @@
 int main (int argc, char * argv[])
 {
 
-  //pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER; //Lock
-//  pthread_cond_t cond = PTHREAD_COND_INITIALIZER; //Condition initializer
-  // Uncomment to see example operation of the readtasks() routine
-  //readtasks((void *)100);
+  readtasks((void *)100);
   // Uncomment to see example operation of the dotasks() routine
-//  dotasks((void *) NULL);
+  dotasks((void *) NULL);
  int sleep_ms = 500;
  if(argc > 1 && argv[1] >=0){
     sleep_ms = atoi(argv[1]);
@@ -47,17 +44,12 @@ int main (int argc, char * argv[])
 
   // Create one pthread for readtasks()
   pthread_create(&producer, NULL, readtasks, sleep_ms);
-
   // Create one or more pthreads for dotasks()
-  pthread_create(&c1, NULL, dotasks, NULL);
-  pthread_create(&c2, NULL, dotasks, NULL);
-  pthread_create(&c3, NULL, dotasks, NULL);
-  pthread_create(&c4, NULL, dotasks, NULL);
+  printf("doing\n");
+  pthread_create(&c1, NULL, dotasks, sleep_ms);
+  pthread_create(&c2, NULL, dotasks, sleep_ms);
+  pthread_create(&c3, NULL, dotasks, sleep_ms);
+  pthread_create(&c4, NULL, dotasks, sleep_ms);
 
-  // pthread_join(p, NULL);
-  // pthread_join(p, NULL);
-  // pthread_join(p, NULL);
-  // pthread_join(p, NULL);
-  // pthread_join(p, NULL);
   return 0;
 }

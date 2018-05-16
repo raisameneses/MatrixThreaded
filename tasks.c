@@ -46,13 +46,14 @@
 #define MILLI_TO_MICROSECONDS 1000
 
 // buffer
-char ** boundedBuffer [MAX];
+char *boundedBuffer [MAX];
 char * tasks[MAX];
 
 // Define variables for get/put routines
 int fill_ptr = 0;
 int use_ptr = 0;
 int count = 0;
+
 pthread_cond_t empty = PTHREAD_COND_INITIALIZER;
 pthread_cond_t fill = PTHREAD_COND_INITIALIZER;
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
@@ -88,8 +89,7 @@ void sleepms(int milliseconds)
    usleep(milliseconds * MILLI_TO_MICROSECONDS);
 }
 
-// Implement Bounded Buffer put() here
-
+// Bounded Buffer put() here
 void put(char* command) {
   boundedBuffer[fill_ptr] = command;
   fill_ptr = (fill_ptr + 1) % MAX;
@@ -98,6 +98,7 @@ void put(char* command) {
 
 // Implement Bounded Buffer get() here
 char* get(){
+  printf("Getting\n");
    char* temp = boundedBuffer[use_ptr];
    use_ptr = (use_ptr + 1) % MAX;
    count--;
@@ -186,35 +187,23 @@ void *readtasks(void *arg)
               strtok(buffer, "\n");
 #if OUTPUT
               printf("read form command file='%s'\n",buffer);
-#endif
+              #endif
 
-              //
-              // TO DO
-              //
               // THE NEW COMMAND WILL BE IN "buffer"
-              printf("Read the command='%s'\n",buffer);
-
               // First make a copy of the string in the buffer
-              //RAISA COMMENT: DO WE NEED TO ASSIGN THE BUFFER?
-
-
+              printf("Read the command='%s'\n",buffer);
+              char * copy = malloc(strlen(buffer) + 1);
+              strcpy(copy, buffer);
               // Add this copy to the bounded buffer for processing by consumer threads...
-
               // Use of locks and condition variables and call to put() routine...
-              //RAISA COMMENT: SEE PAGE 352
-              //inititalize loops
               //for loop, lock each mutex variable and then put and then signal and wait
-
-              for(int i=0; i < MAX; i++){
                 pthread_mutex_lock(&mutex);
                 while(count == MAX) {
                   pthread_cond_wait(&empty, &mutex);
                 }
-                put(buffer); //iS BUFFER HOLDING THE COMMAND AT THIS POINT??
+                put(copy);
                 pthread_cond_signal(&fill);
                 pthread_mutex_unlock(&mutex);
-              }
-
 
           }
 
@@ -267,6 +256,7 @@ task_t *processTask(char * task)
  */
 void *dotasks(void * arg)
 {
+  printf("Doing the tasks\n");
   char out_dir[BUFFSIZ] = "tasks_output";
   char static_task[BUFFSIZ] = "";
   FILE *matrix_file;
@@ -277,24 +267,16 @@ void *dotasks(void * arg)
   // The consumer should cause the program to exit when the 'x' command is received
   while (1)
   {
-    //
-    // TO DO
-    //
+
     // Read command to perform from the bounded buffer HERE
     char * task = (char *) &static_task;
-    int i;
-    //int loops = (int) arg;
-    for(i=0; i< MAX; i++) {
-      pthread_mutex_lock(&mutex);
-      while(count==0){
+    pthread_mutex_lock(&mutex);
+      while(count == 0){
         pthread_cond_wait(&fill, &mutex);
       }
       task = get();
       pthread_cond_signal(&empty);
       pthread_mutex_unlock(&mutex);
-
-    }
-
     // create matrix command example
     sprintf(task, "c a1 20 20 100");
 
@@ -312,7 +294,7 @@ void *dotasks(void * arg)
     // TO DO
     // Remove this sleep command - it is here for demonstration purposes only
     // For now this puts a 1 sec interval between repeating the same command over and over again
-    sleep(1);
+    //sleep(1);
 
     printf("***************DO TASK: '%s'\n",task);
 
@@ -388,6 +370,7 @@ void *dotasks(void * arg)
         break;
       }
     }
+
 
 
   }
